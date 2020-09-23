@@ -1,0 +1,7 @@
+mysql> CREATE TABLE truth(
+    -> id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    -> username VARCHAR(50),
+    -> phone VARCHAR(30),
+    -> email VARCHAR(255),
+    -> password VARCHAR(120)
+    -> );
