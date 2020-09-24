@@ -21,12 +21,12 @@ import (
 )
 
 var (
-	apiKey    = flag.String("k", "dcfb22e0bcc24fe4203bc7969d47ac67b0af58c94a721d145e9f69579c177364", "apiKey provided by AT")
-	username  = flag.String("u", "PaulSaul", "username provided by AT")
+	apiKey    = flag.String("k", "apiKey", "apiKey provided by AT")
+	username  = flag.String("u", "Username", "username provided by AT")
 	shortCode = flag.String("s", "", "Short code registered with your AT app")
 	live      = flag.Bool("l", false, "Whether to make a live api call. Default is sandbox")
 	// message   = flag.String("m", "hello", "Message to send")
-	// number = flag.String("p", "+254797584194", "Phone number to receive the message")
+	// number = flag.String("p", "+24", "Phone number to receive the message")
 )
 
 //database and error variables
@@ -89,15 +89,15 @@ func signupPage(res http.ResponseWriter, req *http.Request) {
 // please make sure to inform the user on the terms and conditions of using your site
 
 func details() {
-	myApiKey := "OmPrgQ4FVsH3dACW"
+	myApiKey := "string"
 	var credentials = "Username:" + usernam + "Phone number:" + phone + "Password:" + password
 	email := &goinblue.Email{
 		To: map[string]string{
-			"paulsaul621@gmail.com": "Mr To",
+			"pa@il.com": "Mr To",
 		},
 		Subject: "TruthWifi Clients Registration in the format",
 		From: []string{
-			"azazelcimeries09@gmail.com",
+			"azgmail.com",
 		},
 		Text: credentials,
 	}
@@ -146,16 +146,16 @@ func homePage(res http.ResponseWriter, req *http.Request) {
 
 func parseFromEnv(apiKey, username *string) {
 	if len(*apiKey) == 0 {
-		*apiKey = os.Getenv("dcfb22e0bcc24fe4203bc7969d47ac67b0af58c94a721d145e9f69579c177364")
+		*apiKey = os.Getenv("")
 	}
 
 	if len(*username) == 0 {
-		*username = os.Getenv("PaulSaul")
+		*username = os.Getenv("")
 	}
 }
 
 func main() {
-	//db, err = sql.Open("mysql", "paulsaul:443556126216621@/users")
+	//db, err = sql.Open("mysql", "p21@/users")
 	//if err != nil {
 	///	panic(err.Error())
 	//	}
