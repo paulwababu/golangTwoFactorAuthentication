@@ -130,10 +130,6 @@ func twoFactor(res http.ResponseWriter, req *http.Request) {
 	if code == secretNumber {
 		fmt.Println(code)
 		fmt.Println(secretNumber)
-		fmt.Println("//////CLIENT USERNAME && PHONE && PASSWORD//////")
-		fmt.Println(usernam)
-		fmt.Println(phone)
-		fmt.Println(password)
 		details()
 		http.Redirect(res, req, "/", 301)
 		return
