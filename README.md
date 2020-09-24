@@ -30,7 +30,11 @@ Go get both the required packages below
 
 go get github.com/kingzbauer/africastalking-go
 
-go get github.com/kingzbauer/africastalking-go
+_ "github.com/go-sql-driver/mysql"
 
 go get golang.org/x/crypto/bcrypt
+
+"github.com/JesusIslam/goinblue"
+
+"database/sql"
 
