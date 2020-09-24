@@ -1,12 +1,19 @@
 package main
 
 import (
-	"crypto/rand"
+	//"database/sql"
+	//"database/sql"
 	"database/sql"
 	"flag"
 	"fmt"
+	"log"
+	"time"
+
+	"math/rand"
 	"net/http"
 	"os"
+
+	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/kingzbauer/africastalking-go/sms"
@@ -23,13 +30,16 @@ var (
 
 //database and error variables
 var db *sql.DB
-var errr error
+
+var err error
 
 //variables for phone number
 var phone string
 var usernam string
 var email string
 var password string
+var random string
+var secretNumber int
 
 //function for the sign up page
 func signupPage(res http.ResponseWriter, req *http.Request) {
@@ -43,16 +53,11 @@ func signupPage(res http.ResponseWriter, req *http.Request) {
 	email = req.FormValue("email")
 	password = req.FormValue("psw")
 
-	http.Redirect(res, req, "/2fa", 301)
-}
+	min, max := 1, 10000
+	rand.Seed(time.Now().UnixNano())
+	secretNumber = rand.Intn(max-min) + min
+	var random = strconv.Itoa(secretNumber)
 
-func twoFactor(res http.ResponseWriter, req *http.Request) {
-	if req.Method != "POST" {
-		http.ServeFile(res, req, "2fa.html")
-	}
-
-	var RandomCrypto, _ = rand.Prime(rand.Reader, 12)
-	var message = "Your four digit code is: " + RandomCrypto.String()
 	var phoneNumber = phone
 	flag.Parse()
 	parseFromEnv(apiKey, username)
@@ -63,7 +68,7 @@ func twoFactor(res http.ResponseWriter, req *http.Request) {
 	}
 
 	srv := sms.NewService(*apiKey, *username, *shortCode, *live)
-	rep, err := srv.Send(message, []string{phoneNumber}, "")
+	rep, err := srv.Send(random, []string{phoneNumber}, "")
 
 	if err != nil {
 		fmt.Printf("Error: %s\n", err)
@@ -71,6 +76,39 @@ func twoFactor(res http.ResponseWriter, req *http.Request) {
 	}
 
 	fmt.Printf("Response: %v\n", rep)
+	http.Redirect(res, req, "/2fa", 301)
+}
+
+func twoFactor(res http.ResponseWriter, req *http.Request) {
+	if req.Method == "GET" {
+		http.ServeFile(res, req, "2fa.html")
+	}
+
+	//form details
+	var codeEntered = req.FormValue("pass")
+
+	code, _ := strconv.Atoi(codeEntered)
+	//var user string
+	//var phonE = phone
+	//var usernamE = usernam
+	//var emaiL = email
+	//var passworD = password
+	// err = db.QueryRow("SELECT username FROM truth WHERE username=?", usernam).Scan(&user)
+
+	//validate if the code entered is the one sent by system
+	if code == secretNumber {
+		fmt.Println(code)
+		fmt.Println(secretNumber)
+		http.Redirect(res, req, "/", 301)
+		return
+		// errr := db.QueryRow("SELECT username FROM truth WHERE username=?", usernam).Scan(&user)
+	}
+	//retry again
+	http.Redirect(res, req, "/2fa", 301)
+}
+
+func homePage(res http.ResponseWriter, req *http.Request) {
+	http.ServeFile(res, req, "index.html")
 }
 
 func parseFromEnv(apiKey, username *string) {
@@ -84,8 +122,21 @@ func parseFromEnv(apiKey, username *string) {
 }
 
 func main() {
+	//db, err = sql.Open("mysql", "paulsaul:443556126216621@/users")
+	//if err != nil {
+	///	panic(err.Error())
+	//	}
+	//	defer db.Close()
+	//
+	//	err = db.Ping()
+	//	if err != nil {
+	//		panic(err.Error())
+	//	}
+
+	http.HandleFunc("/", homePage)
 	http.HandleFunc("/2fa", twoFactor)
 	http.HandleFunc("/signup", signupPage)
+	log.Println("listening on Port 8080")
 	http.ListenAndServe(":8080", nil)
 
 }
