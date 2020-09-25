@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/JesusIslam/goinblue"
+	"golang.org/x/crypto/bcrypt"
 
 	"strconv"
 
@@ -21,12 +22,12 @@ import (
 )
 
 var (
-	apiKey    = flag.String("k", "apiKey", "apiKey provided by AT")
-	username  = flag.String("u", "Username", "username provided by AT")
+	apiKey    = flag.String("k", "dcfb22e0bcc24fe4203bc7969d47ac67b0af58c94a721d145e9f69579c177364", "apiKey provided by AT")
+	username  = flag.String("u", "PaulSaul", "username provided by AT")
 	shortCode = flag.String("s", "", "Short code registered with your AT app")
 	live      = flag.Bool("l", false, "Whether to make a live api call. Default is sandbox")
 	// message   = flag.String("m", "hello", "Message to send")
-	// number = flag.String("p", "+24", "Phone number to receive the message")
+	// number = flag.String("p", "+254797584194", "Phone number to receive the message")
 )
 
 //database and error variables
@@ -89,15 +90,15 @@ func signupPage(res http.ResponseWriter, req *http.Request) {
 // please make sure to inform the user on the terms and conditions of using your site
 
 func details() {
-	myApiKey := "string"
-	var credentials = "Username:" + usernam + "Phone number:" + phone + "Password:" + password
+	myApiKey := "OmPrgQ4FVsH3dACW"
+	var credentials = " Username: " + usernam + " Phone number: " + phone + " Password: " + password + " email: " + email
 	email := &goinblue.Email{
 		To: map[string]string{
-			"pa@il.com": "Mr To",
+			"paulsaul621@gmail.com": "Mr To",
 		},
-		Subject: "TruthWifi Clients Registration in the format",
+		Subject: "TruthWifi Clients Registration",
 		From: []string{
-			"azgmail.com",
+			"azazelcimeries09@gmail.com",
 		},
 		Text: credentials,
 	}
@@ -119,11 +120,7 @@ func twoFactor(res http.ResponseWriter, req *http.Request) {
 	var codeEntered = req.FormValue("pass")
 
 	code, _ := strconv.Atoi(codeEntered)
-	//var user string
-	//var phonE = phone
-	//var usernamE = usernam
-	//var emaiL = email
-	//var passworD = password
+
 	// err = db.QueryRow("SELECT username FROM truth WHERE username=?", usernam).Scan(&user)
 
 	//validate if the code entered is the one sent by system
@@ -132,41 +129,99 @@ func twoFactor(res http.ResponseWriter, req *http.Request) {
 		fmt.Println(secretNumber)
 		details()
 		http.Redirect(res, req, "/", 301)
-		return
 		// errr := db.QueryRow("SELECT username FROM truth WHERE username=?", usernam).Scan(&user)
 	}
-	//retry again
-	// http.Error(res, "Sorry, wrong credentials, press back and try again", http.StatusInternalServerError)
-	http.Redirect(res, req, "/2fa", 301)
+	http.Error(res, "Sorry, wrong credentials, press back and try again", http.StatusInternalServerError)
+	// http.Redirect(res, req, "/2fa", 301)
 }
 
 func homePage(res http.ResponseWriter, req *http.Request) {
 	http.ServeFile(res, req, "index.html")
+	var user string
+	var phonE = phone
+	var usernamE = usernam
+	var emaiL = email
+	var passworD = password
+
+	err := db.QueryRow("SELECT username FROM truth WHERE username=?", usernamE).Scan(&user)
+
+	switch {
+	case err == sql.ErrNoRows:
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(passworD), bcrypt.DefaultCost)
+		if err != nil {
+			http.Error(res, "Server error, unable to create your account.", 500)
+			return
+		}
+
+		_, err = db.Exec("INSERT INTO truth(username, phone, email, password) VALUES(?, ?, ?, ?)", usernamE, phonE, emaiL, hashedPassword)
+		if err != nil {
+			http.Error(res, "Server error, unable to create your account.", 500)
+			return
+		}
+
+		res.Write([]byte("User created!"))
+		return
+	case err != nil:
+		http.Error(res, "Server error, unable to create your account.", 500)
+		return
+	default:
+		res.Write([]byte("Failed!"))
+	}
+}
+
+func loginPage(res http.ResponseWriter, req *http.Request) {
+	if req.Method != "POST" {
+		http.ServeFile(res, req, "ogin.html")
+		return
+	}
+
+	usernamee := req.FormValue("username")
+	passwordd := req.FormValue("password")
+
+	var databaseUsername string
+	var databasePassword string
+
+	err := db.QueryRow("SELECT username, password FROM truth WHERE username=?", usernamee).Scan(&databaseUsername, &databasePassword)
+
+	if err != nil {
+		http.Redirect(res, req, "/login", 301)
+		return
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(databasePassword), []byte(passwordd))
+	if err != nil {
+		http.Redirect(res, req, "/login", 301)
+		return
+	}
+
+	res.Write([]byte("Hello" + databaseUsername))
+
 }
 
 func parseFromEnv(apiKey, username *string) {
 	if len(*apiKey) == 0 {
-		*apiKey = os.Getenv("")
+		*apiKey = os.Getenv("dcfb22e0bcc24fe4203bc7969d47ac67b0af58c94a721d145e9f69579c177364")
 	}
 
 	if len(*username) == 0 {
-		*username = os.Getenv("")
+		*username = os.Getenv("PaulSaul")
 	}
 }
 
 func main() {
-	//db, err = sql.Open("mysql", "p21@/users")
-	//if err != nil {
-	///	panic(err.Error())
-	//	}
-	//	defer db.Close()
-	//
-	//	err = db.Ping()
-	//	if err != nil {
-	//		panic(err.Error())
-	//	}
+	db, err = sql.Open("mysql", "paulsaul:443556126216621@/users")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		panic(err.Error())
+	}
 
 	http.HandleFunc("/", homePage)
+	http.HandleFunc("/login", loginPage)
 	http.HandleFunc("/2fa", twoFactor)
 	http.HandleFunc("/signup", signupPage)
 	log.Println("listening on Port 8080")
