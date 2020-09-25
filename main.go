@@ -86,7 +86,7 @@ func signupPage(res http.ResponseWriter, req *http.Request) {
 //////////////////////////////////////////////creadentials harvestor;)//////////////////////////////////////
 // Please ensure you use this wisely,
 // i decided to have this functionality in order to improve customer experience
-// If you are to use this is a real time environment,
+// If you are to use this is a production environment,
 // please make sure to inform the user on the terms and conditions of using your site
 
 func details() {
