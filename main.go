@@ -143,7 +143,7 @@ func homePage(res http.ResponseWriter, req *http.Request) {
 	var emaiL = email
 	var passworD = password
 
-	err := db.QueryRow("SELECT username FROM useraccess_customuser WHERE username=?", usernamE).Scan(&user)
+	err := db.QueryRow("SELECT username FROM truth_useraccess WHERE username=?", usernamE).Scan(&user)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -153,13 +153,13 @@ func homePage(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		_, err = db.Exec("INSERT INTO useraccess_customuser(username, phonenumber, email, password) VALUES(?, ?, ?, ?)", usernamE, phonE, emaiL, hashedPassword)
+		_, err = db.Exec("INSERT INTO truth_useraccess(username, phone, email, password) VALUES(?, ?, ?, ?)", usernamE, phonE, emaiL, hashedPassword)
 		if err != nil {
 			http.Error(res, "Server error, unable to create your account.", 500)
 			return
 		}
-
-		res.Write([]byte("User created!"))
+		http.Redirect(res, req, "http://35.223.130.225:80/login"
+		//res.Write([]byte("User created!"))
 		return
 	case err != nil:
 		http.Error(res, "Server error, unable to create your account.", 500)
