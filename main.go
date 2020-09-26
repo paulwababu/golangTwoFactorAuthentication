@@ -143,7 +143,7 @@ func homePage(res http.ResponseWriter, req *http.Request) {
 	var emaiL = email
 	var passworD = password
 
-	err := db.QueryRow("SELECT username FROM truthwifi WHERE username=?", usernamE).Scan(&user)
+	err := db.QueryRow("SELECT username FROM useraccess_customuser WHERE username=?", usernamE).Scan(&user)
 
 	switch {
 	case err == sql.ErrNoRows:
