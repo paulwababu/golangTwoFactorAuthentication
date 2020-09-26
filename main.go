@@ -158,7 +158,8 @@ func homePage(res http.ResponseWriter, req *http.Request) {
 			http.Error(res, "Server error, unable to create your account.", 500)
 			return
 		}
-		http.Redirect(res, req, "http://35.223.130.225:80/login"
+		
+		http.Redirect(res, req, "http://35.223.130.225:80/login", 301)
 		//res.Write([]byte("User created!"))
 		return
 	case err != nil:
