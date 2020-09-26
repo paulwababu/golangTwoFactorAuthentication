@@ -159,7 +159,7 @@ func homePage(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 		
-		http.Redirect(res, req, "http://35.223.130.225:80/login", 301)
+		http.Redirect(res, req, "http://35.223.130.225/accounts/login/", 301)
 		//res.Write([]byte("User created!"))
 		return
 	case err != nil:
