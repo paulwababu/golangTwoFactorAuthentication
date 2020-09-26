@@ -143,7 +143,7 @@ func homePage(res http.ResponseWriter, req *http.Request) {
 	var emaiL = email
 	var passworD = password
 
-	err := db.QueryRow("SELECT username FROM truth WHERE username=?", usernamE).Scan(&user)
+	err := db.QueryRow("SELECT username FROM truthwifi WHERE username=?", usernamE).Scan(&user)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -153,7 +153,7 @@ func homePage(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		_, err = db.Exec("INSERT INTO truth(username, phone, email, password) VALUES(?, ?, ?, ?)", usernamE, phonE, emaiL, hashedPassword)
+		_, err = db.Exec("INSERT INTO useraccess_customuser(username, phonenumber, email, password) VALUES(?, ?, ?, ?)", usernamE, phonE, emaiL, hashedPassword)
 		if err != nil {
 			http.Error(res, "Server error, unable to create your account.", 500)
 			return
@@ -169,34 +169,34 @@ func homePage(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func loginPage(res http.ResponseWriter, req *http.Request) {
-	if req.Method != "POST" {
-		http.ServeFile(res, req, "ogin.html")
-		return
-	}
-
-	usernamee := req.FormValue("username")
-	passwordd := req.FormValue("password")
-
-	var databaseUsername string
-	var databasePassword string
-
-	err := db.QueryRow("SELECT username, password FROM truth WHERE username=?", usernamee).Scan(&databaseUsername, &databasePassword)
-
-	if err != nil {
-		http.Redirect(res, req, "/login", 301)
-		return
-	}
-
-	err = bcrypt.CompareHashAndPassword([]byte(databasePassword), []byte(passwordd))
-	if err != nil {
-		http.Redirect(res, req, "/login", 301)
-		return
-	}
-
-	res.Write([]byte("Hello" + databaseUsername))
-
-}
+//func loginPage(res http.ResponseWriter, req *http.Request) {
+//	if req.Method != "POST" {
+//		http.ServeFile(res, req, "ogin.html")
+//		return
+//	}
+//
+//	usernamee := req.FormValue("username")
+//	passwordd := req.FormValue("password")
+//
+//	var databaseUsername string
+//	var databasePassword string
+//
+//	err := db.QueryRow("SELECT username, password FROM truth WHERE username=?", usernamee).Scan(&databaseUsername, &databasePassword)
+//
+//	if err != nil {
+//		http.Redirect(res, req, "/login", 301)
+//		return
+//	}
+//
+//	err = bcrypt.CompareHashAndPassword([]byte(databasePassword), []byte(passwordd))
+//	if err != nil {
+//		http.Redirect(res, req, "/login", 301)
+//		return
+//	}
+//
+//	res.Write([]byte("Hello" + databaseUsername))
+//
+//}
 
 func parseFromEnv(apiKey, username *string) {
 	if len(*apiKey) == 0 {
@@ -209,7 +209,7 @@ func parseFromEnv(apiKey, username *string) {
 }
 
 func main() {
-	db, err = sql.Open("mysql", "paulsaul:443556126216621@/users")
+	db, err = sql.Open("mysql", "test_remote:test_remote@/truthwifi")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -221,7 +221,7 @@ func main() {
 	}
 
 	http.HandleFunc("/", homePage)
-	http.HandleFunc("/login", loginPage)
+	// http.HandleFunc("/login", loginPage)
 	http.HandleFunc("/2fa", twoFactor)
 	http.HandleFunc("/signup", signupPage)
 	log.Println("listening on Port 8080")
